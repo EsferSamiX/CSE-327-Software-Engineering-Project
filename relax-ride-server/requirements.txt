@@ -1,0 +1,6 @@
+black==23.12.1
+cryptography==42.0.4
+Flask==3.0.1
+PyJWT==2.8.0
+tox==4.12.1
+flask_sqlalchemy
