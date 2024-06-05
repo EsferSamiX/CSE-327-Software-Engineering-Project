@@ -58,4 +58,9 @@ class MainController extends GetxController {
   RxString tripFrom = "".obs;
 
   tripModel.Data? tripSelectedData;
+
+  RxBool selectedPaymentMethod = false.obs;
+  RxBool selectedPaymentMethodLoan = false.obs;
+
+  static List userNotification = [];
 }

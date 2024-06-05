@@ -53,14 +53,30 @@ class _AvailableTripsState extends State<AvailableTrips> {
         Future.delayed(const Duration(milliseconds: 600), () {
           setState(() {});
         });
+      } else if (response.statusCode == 400) {
+        Get.snackbar('Sorry!', 'No trips available');
+        debugPrint('No trips available');
+        setState(() {
+          stateLoading = false;
+        });
+      } else if (response.statusCode == 404) {
+        Get.snackbar('Sorry!', 'No trips available');
+        debugPrint('No trips available');
+        setState(() {
+          stateLoading = false;
+        });
       } else if (response.statusCode == 409) {
         // User already registered
         Get.snackbar('Error', 'User/Phone number already exists');
         debugPrint('Phone number already exists');
+        setState(() {
+          stateLoading = false;
+        });
       } else {
         // Handle other status codes if needed
         Get.snackbar('Error', 'Error occurred during trip');
         debugPrint('Unexpected status code: ${response.statusCode}');
+        stateLoading = false;
       }
       stateLoading = false;
     } catch (e) {
@@ -74,23 +90,28 @@ class _AvailableTripsState extends State<AvailableTrips> {
 
   @override
   Widget build(BuildContext context) {
+    final triplength = tripResponseData?.data.length.toInt() ?? 0;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Available Trips'),
       ),
       body: stateLoading
           ? const Center(child: CircularProgressIndicator())
-          : ListView.builder(
-              shrinkWrap: true,
-              physics: const AlwaysScrollableScrollPhysics(),
-              itemCount: tripResponseData?.data.length ?? 0,
-              itemBuilder: (context, index) {
-                return Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Trips(data: tripResponseData!.data[index]),
-                );
-              },
-            ),
+          : (triplength > 0)
+              ? ListView.builder(
+                  shrinkWrap: true,
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  itemCount: tripResponseData?.data.length ?? 0,
+                  itemBuilder: (context, index) {
+                    return Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Trips(data: tripResponseData!.data[index]),
+                    );
+                  },
+                )
+              : const Center(
+                  child: Text('No trips available'),
+                ),
     );
   }
 }

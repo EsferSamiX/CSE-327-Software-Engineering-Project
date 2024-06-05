@@ -1,13 +1,14 @@
-import 'package:flutter/cupertino.dart';
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
+import 'package:http/http.dart' as http;
+import 'package:relax_ride/constants.dart';
+import 'package:relax_ride/getx_controller/main_controller.dart';
 import 'package:relax_ride/presentation/ui/screens/jet_setter/platinum/platinum_page4.dart';
-
-import 'package:relax_ride/presentation/ui/screens/jet_setter/platinum/platinum_page5.dart';
-
 import '../../../utility/app_colors.dart';
 
+MainController mainController = Get.find();
 
 class PlatinumPayment extends StatefulWidget {
   const PlatinumPayment({super.key});
@@ -17,87 +18,136 @@ class PlatinumPayment extends StatefulWidget {
 }
 
 class _PlatinumPaymentState extends State<PlatinumPayment> {
+  @override
+  void initState() {
+    mainController.selectedPaymentMethod.value = false;
+    super.initState();
+  }
 
+  void fetchPayment() async {
+    try {
+      final response = await http.post(
+        Uri.parse('$uri/jetSetter'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(<String, String>{
+          'userId': mainController.userData.data!.id.toString(),
+          'packageId': "2",
+        }),
+      );
 
+      if (response.statusCode == 200) {
+        mainController.setData('data', response.body);
+        Get.to(const PlatinumPaymentSuccess());
+        mainController.inputClear();
+      } else if (response.statusCode == 409) {
+        // User already registered
+        Get.snackbar('Error', 'Payment failed!');
+        debugPrint('Phone number already exists');
+      } else {
+        // Handle other status codes if needed
+        Get.snackbar('Error', 'Error occurred during payment!');
+        debugPrint('Unexpected status code: ${response.statusCode}');
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'Error occurred during processing payment!');
+      // Handle error
+      debugPrint('Error occurred during registration: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-
-
-        body: SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              const SizedBox(height: 40,),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(25.0, 0.0, 0.0, 0.0),
-                child: Row(
-                  children: [
-                    const SizedBox(height: 30,),
-                    Text(
-                      'Payment',
-                      style: TextStyle(
-                        fontSize: 26,
-                      ),
-                    ),
-
-                  ],
-                ),
-              ),
-
-              Divider(
-                color: AppColors.primaryColor,
-                thickness: 1,
-              ),
-              const SizedBox(height: 20,),
-              Row(
+    return Scaffold(
+      body: SingleChildScrollView(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            const SizedBox(
+              height: 40,
+            ),
+            const Padding(
+              padding: EdgeInsets.fromLTRB(25.0, 0.0, 0.0, 0.0),
+              child: Row(
                 children: [
-                  const SizedBox(height: 5,width: 8,),
+                  SizedBox(
+                    height: 30,
+                  ),
                   Text(
-                    'Select Payment  Method',
+                    'Payment',
                     style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
+                      fontSize: 26,
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 20,),
-              RadioWidget(),
-
-              const SizedBox(height: 20,),
-              TextFormField(
-                initialValue: '3000',
-                readOnly: true,
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 24.0),
-                decoration: InputDecoration(
-                  labelText: 'Amount',
-                  contentPadding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(4.0),
-                    borderSide: BorderSide(color: AppColors.primaryColor),
+            ),
+            const Divider(
+              color: AppColors.primaryColor,
+              thickness: 1,
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            const Row(
+              children: [
+                SizedBox(
+                  height: 5,
+                  width: 8,
+                ),
+                Text(
+                  'Select Payment  Method',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
+              ],
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            const RadioWidget(),
+            const SizedBox(
+              height: 20,
+            ),
+            TextFormField(
+              initialValue: '3000',
+              readOnly: true,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 24.0),
+              decoration: InputDecoration(
+                labelText: 'Amount',
+                contentPadding: const EdgeInsets.symmetric(
+                    vertical: 20.0, horizontal: 16.0),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(4.0),
+                  borderSide: const BorderSide(color: AppColors.primaryColor),
+                ),
               ),
-
-              const SizedBox(height: 20,),
-
-              SizedBox(
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            Obx(() {
+              return SizedBox(
                 width: 130,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primaryColor,
+                    backgroundColor: mainController.selectedPaymentMethod.value
+                        ? AppColors.primaryColor
+                        : Colors.grey,
                   ),
                   onPressed: () {
-                    Get.to(PlatinumPaymentSuccess());
+                    if (!mainController.selectedPaymentMethod.value) {
+                      return;
+                    }
+                    fetchPayment();
                   },
-                  child: Row(
+                  child: const Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-
                       Text(
                         'Payment',
                         style: TextStyle(
@@ -109,9 +159,9 @@ class _PlatinumPaymentState extends State<PlatinumPayment> {
                     ],
                   ),
                 ),
-              )
-            ],
-          ),
+              );
+            })
+          ],
         ),
       ),
     );
@@ -126,11 +176,13 @@ class PaymentMethod {
 }
 
 class RadioWidget extends StatefulWidget {
+  const RadioWidget({super.key});
+
   @override
-  _RadioWidgetState createState() => _RadioWidgetState();
+  RadioWidgetState createState() => RadioWidgetState();
 }
 
-class _RadioWidgetState extends State<RadioWidget> {
+class RadioWidgetState extends State<RadioWidget> {
   PaymentMethod? _selectedPaymentMethod;
 
   final List<PaymentMethod> paymentMethods = [
@@ -147,28 +199,28 @@ class _RadioWidgetState extends State<RadioWidget> {
       children: [
         _selectedPaymentMethod != null
             ? Column(
-          children: [
-            Container(
-              height: 60,
-              width: 60,
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                  image: AssetImage(_selectedPaymentMethod!.imagePath),
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-            SizedBox(height: 10),
-            Text(_selectedPaymentMethod!.name),
-          ],
-        )
-            : SizedBox(),
-        SizedBox(height: 20),
+                children: [
+                  Container(
+                    height: 60,
+                    width: 60,
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                        image: AssetImage(_selectedPaymentMethod!.imagePath),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(_selectedPaymentMethod!.name),
+                ],
+              )
+            : const SizedBox(),
+        const SizedBox(height: 20),
         Theme(
           data: Theme.of(context).copyWith(
             radioTheme: RadioThemeData(
               fillColor: MaterialStateProperty.resolveWith<Color>(
-                    (Set<MaterialState> states) {
+                (Set<MaterialState> states) {
                   if (states.contains(MaterialState.selected)) {
                     return AppColors.primaryColor;
                   }
@@ -181,49 +233,48 @@ class _RadioWidgetState extends State<RadioWidget> {
             children: paymentMethods
                 .map(
                   (method) => RadioListTile<PaymentMethod>(
-                title: Container(
-                  height: 65,
-                  width: 350,
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade200,
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey,
-                        offset: const Offset(1, 1),
-                        blurRadius: 15,
-                        spreadRadius: 1,
-                      ),
-                    ],
-                  ),
-
-                  child: Row(
-                    children: [
-                      Container(
-                        height: 60,
-                        width: 60,
-                        decoration: BoxDecoration(
-
-                          image: DecorationImage(
-                            image: AssetImage(method.imagePath),
-                            //fit: BoxFit.cover,
+                    title: Container(
+                      height: 65,
+                      width: 350,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade200,
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Colors.grey,
+                            offset: Offset(1, 1),
+                            blurRadius: 15,
+                            spreadRadius: 1,
                           ),
-                        ),
+                        ],
                       ),
-                      SizedBox(width: 10),
-                      Text(method.name),
-                    ],
+                      child: Row(
+                        children: [
+                          Container(
+                            height: 60,
+                            width: 60,
+                            decoration: BoxDecoration(
+                              image: DecorationImage(
+                                image: AssetImage(method.imagePath),
+                                //fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Text(method.name),
+                        ],
+                      ),
+                    ),
+                    value: method,
+                    groupValue: _selectedPaymentMethod,
+                    onChanged: (PaymentMethod? value) {
+                      setState(() {
+                        _selectedPaymentMethod = value;
+                        mainController.selectedPaymentMethod.value = true;
+                      });
+                    },
                   ),
-                ),
-                value: method,
-                groupValue: _selectedPaymentMethod,
-                onChanged: (PaymentMethod? value) {
-                  setState(() {
-                    _selectedPaymentMethod = value;
-                  });
-                },
-              ),
-            )
+                )
                 .toList(),
           ),
         ),

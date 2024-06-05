@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:relax_ride/getx_controller/main_controller.dart';
 import 'package:relax_ride/models/trip_model.dart';
+import 'package:relax_ride/presentation/ui/screens/jet_setter/gold/gold_page3.dart';
 import 'package:relax_ride/presentation/ui/utility/app_colors.dart';
 import 'checkout_screen.dart';
+
+MainController mainController = Get.find();
 
 class SeatAllocation extends StatefulWidget {
   const SeatAllocation({super.key, required this.data});
@@ -15,11 +18,9 @@ class SeatAllocation extends StatefulWidget {
 
 class SeatAllocationState extends State<SeatAllocation> {
   List<String> selectedSeats = [];
-  MainController mainController = Get.find();
 
   Future<void> continueTrip() async {
-    mainController.userId.value =
-        mainController.userDataLocal!.data!.id.toString();
+    mainController.userId.value = mainController.userData.data!.id.toString();
     mainController.tripId.value = widget.data.id.toString();
     mainController.seatTakenLength.value = selectedSeats.length;
     mainController.seatTaken.value = selectedSeats.toString();
@@ -74,6 +75,58 @@ class SeatAllocationState extends State<SeatAllocation> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
+            const SizedBox(height: 20),
+            mainController.userData.data!.package!.toInt() > 0
+                ? Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const SizedBox(
+                        width: 20,
+                      ),
+                      const Text(
+                        'Remaining Loan Seats :',
+                        style: TextStyle(
+                          fontSize: 22,
+                          color: Colors.black,
+                        ),
+                      ),
+                      const SizedBox(
+                        width: 20,
+                      ),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryColor,
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: const [
+                            BoxShadow(
+                              color: Colors.grey,
+                              offset: Offset(1, 1),
+                              blurRadius: 8,
+                              spreadRadius: 1,
+                            ),
+                          ],
+                        ),
+                        child: SizedBox(
+                          width: 50,
+                          height: 50,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                mainController.userData.data!.availableLoan
+                                    .toString(),
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  )
+                : const SizedBox(),
             const SizedBox(height: 20),
             Container(
               decoration: BoxDecoration(

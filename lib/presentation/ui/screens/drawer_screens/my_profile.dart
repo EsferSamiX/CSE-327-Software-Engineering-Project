@@ -63,7 +63,7 @@ class _MyProfileState extends State<MyProfile> {
                             const CircleAvatar(
                               radius: 60,
                               backgroundImage:
-                                  AssetImage('assets/images/user1.png'),
+                                  AssetImage('assets/images/user.png'),
                             ),
                             Positioned(
                               right: 0,

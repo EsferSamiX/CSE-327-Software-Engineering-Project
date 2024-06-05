@@ -8,6 +8,11 @@ class AssetsPath{
   static const String c3='$imagePath/c3.jpg';
   static const String c4='$imagePath/c4.jpg';
   static const String c5='$imagePath/c5.jpg';
+  static const String c11='$imagePath/c11.jpg';
+  static const String c22='$imagePath/c22.jpg';
+  static const String c33='$imagePath/c33.jpg';
+  static const String c44='$imagePath/c44.jpg';
+  static const String c55='$imagePath/c55.jpg';
   static const String seat='$imagePath/seat.png';
   static const String seat1='$imagePath/seat1.png';
   static const String seat2='$imagePath/seat2.png';

@@ -67,7 +67,7 @@ class _FreeUserP1State extends State<FreeUserP1> {
                     ],
                   ),
                   child: SizedBox(
-                    width: 380,
+                    width: 360,
                     height: 250,
                     child: Column(
                       children: [

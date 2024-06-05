@@ -51,7 +51,9 @@ class _HomeScreenState extends State<HomeScreen> {
         actions: [
           CirculericonButton(
             onTap: () {
-              Get.to(() => const Notifications());
+              //Get.to(() => const Notifications());
+              Get.snackbar('Thank you for your interest!',
+                  'We are currently working on this feature. Please check back later.');
             },
             iconData: Icons.notifications_active_outlined,
           ),
@@ -85,7 +87,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               currentAccountPicture: const CircleAvatar(
                 radius: 60,
-                backgroundImage: AssetImage('assets/images/user1.png'),
+                backgroundImage: AssetImage('assets/images/user.png'),
               ),
             ),
             _buildItem(
@@ -350,66 +352,126 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _selectDate(BuildContext context) async {
-    DateTime? _picked = await showDatePicker(
+    DateTime now = DateTime.now();
+    DateTime todayMidnight = DateTime(now.year, now.month, now.day);
+    DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
+      initialDate: todayMidnight,
       firstDate: DateTime(2020),
       lastDate: DateTime(2040),
     );
-    if (_picked != null) {
-      setState(() {
-        _dateController.text = DateFormat('EEEE, d MMMM yyyy').format(_picked);
-      });
+
+    if (picked != null) {
+      if (picked.isBefore(todayMidnight)) {
+        _showDialog(
+            context, 'Invalid Date', 'The selected date was in the past.');
+      } else if (picked.isAfter(now.add(const Duration(days: 30)))) {
+        _showDialog(context, 'Invalid Date',
+            'The selected date is too early to book.');
+      } else {
+        setState(() {
+          _dateController.text = DateFormat('EEEE, d MMMM yyyy').format(picked);
+        });
+      }
     }
   }
-}
 
-Widget _buildItem(
-    IconData icon, String title, bool isElevated, VoidCallback onTap) {
-  return GestureDetector(
-    onTap: onTap,
-    child: Column(
-      children: [
-        AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          height: 60,
-          width: 277,
-          decoration: BoxDecoration(
-            color: AppColors.p1,
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: isElevated
-                ? [
-                    BoxShadow(
-                      color: Colors.grey.shade500,
-                      offset: const Offset(4, 4),
-                      blurRadius: 15,
-                      spreadRadius: 1,
-                    ),
-                    const BoxShadow(
-                      color: Colors.white,
-                      offset: Offset(-4, -4),
-                      blurRadius: 15,
-                      spreadRadius: 1,
-                    ),
-                  ]
-                : [],
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Row(
-              children: [
-                Icon(icon),
-                const SizedBox(width: 16),
-                Text(
-                  title,
-                  style: const TextStyle(fontSize: 16),
-                ),
-              ],
+  void _showDialog(BuildContext context, String title, String content) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(
+            content,
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
             ),
           ),
-        ),
-        const SizedBox(height: 10),
-      ],
-    ),
-  );
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildItem(
+      IconData icon, String title, bool isElevated, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        children: [
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            height: 60,
+            width: 277,
+            decoration: BoxDecoration(
+              color: AppColors.p1,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: isElevated
+                  ? [
+                      BoxShadow(
+                        color: Colors.grey.shade500,
+                        offset: const Offset(4, 4),
+                        blurRadius: 15,
+                        spreadRadius: 1,
+                      ),
+                      const BoxShadow(
+                        color: Colors.white,
+                        offset: Offset(-4, -4),
+                        blurRadius: 15,
+                        spreadRadius: 1,
+                      ),
+                    ]
+                  : [],
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Row(
+                children: [
+                  Icon(icon),
+                  const SizedBox(width: 16),
+                  Text(
+                    title,
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+        ],
+      ),
+    );
+  }
 }
+// showDialog(
+//           context: context,
+//           builder: (BuildContext context) {
+//             return AlertDialog(
+//               title: const Text('Booking Limit Reached'),
+//               content: const Text(
+//                 'Sorry, you can\'t book more than 4 seats!',
+//                 style: TextStyle(
+//                   fontSize: 12,
+//                   fontWeight: FontWeight.w500,
+//                 ),
+//               ),
+//               actions: [
+//                 TextButton(
+//                   onPressed: () {
+//                     Navigator.of(context).pop();
+//                   },
+//                   child: const Text('OK'),
+//                 ),
+//               ],
+//             );
+//           },
+//         );

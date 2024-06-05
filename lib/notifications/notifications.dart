@@ -39,7 +39,7 @@ class _NotificationsState extends State<Notifications> {
           const SizedBox(height: 2,),
           Expanded(
             child: ListView.builder(
-              itemCount: 3,
+              itemCount: 1,
               itemExtent: 100,
               itemBuilder: (context, index) {
                 return Container(
@@ -50,8 +50,8 @@ class _NotificationsState extends State<Notifications> {
                     borderRadius: BorderRadius.circular(8.0),
                   ),
                   child: ListTile(
-                    title: Text('Trip ${index + 1}'),
-                    subtitle: Text('Description of trip ${index + 1}'),
+                    title: Text('Trip Confirmed'),
+                    subtitle: Text('Your trip has been confirmed successfully'),
                     leading: Icon(Icons.notifications_active_rounded),
                     onTap: () {
                       // Handle onTap event
@@ -67,3 +67,4 @@ class _NotificationsState extends State<Notifications> {
   }
 }
 
+//'Trip Confirmed', 'Your trip has been confirmed successfully' ${index + 1}

@@ -35,7 +35,7 @@ class CompleteProfileScreen extends StatelessWidget {
             'username': mainController.phoneController.text +
                 mainController.fnameController.text +
                 mainController.lnameController.text,
-            'phone': mainController.phoneController.text,
+            'phone': "+880${mainController.phoneController.text}",
             'password': mainController.passwordController.text,
             'email': mainController.emailController.text,
             'fname': mainController.fnameController.text,
@@ -48,6 +48,9 @@ class CompleteProfileScreen extends StatelessWidget {
           mainController.setData('data', response.body);
           Get.offAll(() => const MainBottomNav());
           mainController.inputClear();
+        } else if (response.statusCode == 404) {
+          Get.snackbar('Error', 'User/Phone number doesn\'t exists');
+          debugPrint('Phone number already exists');
         } else if (response.statusCode == 409) {
           // User already registered
           Get.snackbar('Error', 'User/Phone number already exists');

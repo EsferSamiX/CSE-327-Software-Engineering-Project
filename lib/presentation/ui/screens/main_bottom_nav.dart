@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:get/get_state_manager/src/simple/get_state.dart';
+import 'package:get/get.dart';
 import 'package:relax_ride/Digitai_wallet/digital_wallet.dart';
+import 'package:relax_ride/getx_controller/main_controller.dart';
+import 'package:relax_ride/loan/free_user/freeUserPage1.dart';
+import 'package:relax_ride/loan/gold_user/goldUserPage1.dart';
+import 'package:relax_ride/loan/platinum_user/platinumUserPage1.dart';
 import 'package:relax_ride/presentation/ui/screens/jet_setter.dart';
-import 'package:relax_ride/presentation/ui/screens/loan.dart';
 import 'package:relax_ride/presentation/ui/utility/app_colors.dart';
 import '../../state_holders/main_bottom_nav_controller.dart';
 import 'home_screen.dart';
+
+MainController mainController = Get.find();
 
 class MainBottomNav extends StatefulWidget {
   const MainBottomNav({super.key});
@@ -15,11 +20,11 @@ class MainBottomNav extends StatefulWidget {
 }
 
 class _MainBottomNavState extends State<MainBottomNav> {
-  final List<Widget> _screens = const [
-    HomeScreen(),
-    jetSetter(),
-    NeedLloan(),
-    DigitalWallet(),
+  final List<Widget> _screens = [
+    const HomeScreen(),
+    const jetSetter(),
+    needLloanFoo(),
+    const DigitalWallet(),
   ];
   @override
   Widget build(BuildContext context) {
@@ -44,5 +49,17 @@ class _MainBottomNavState extends State<MainBottomNav> {
         ),
       );
     });
+  }
+}
+
+Widget needLloanFoo() {
+  if (mainController.userData.data!.package == 0) {
+    return const FreeUserP1();
+  } else if (mainController.userData.data!.package == 1) {
+    return const GoldUserP1();
+  } else if (mainController.userData.data!.package == 2) {
+    return const PlatinumUserP1();
+  } else {
+    return const FreeUserP1();
   }
 }

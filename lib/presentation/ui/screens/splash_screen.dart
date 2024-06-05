@@ -22,7 +22,6 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   void moveToNextScreen() async {
-   // mainController.box.erase();
     bool state = mainController.box.hasData('data');
     await Future.delayed(const Duration(seconds: 2));
     debugPrint('Data: ${mainController.box.hasData('data')}');

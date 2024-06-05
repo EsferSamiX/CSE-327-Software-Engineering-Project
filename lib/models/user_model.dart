@@ -47,6 +47,9 @@ class Data {
   final String? lname;
   final String? phone;
   final String? userModelname;
+  final double? balance;
+  final int? package;
+  final int? availableLoan;
 
   Data({
     this.city,
@@ -56,6 +59,9 @@ class Data {
     this.lname,
     this.phone,
     this.userModelname,
+    this.balance,
+    this.package,
+    this.availableLoan,
   });
 
   Data copyWith({
@@ -66,6 +72,9 @@ class Data {
     String? lname,
     String? phone,
     String? userModelname,
+    double? balance,
+    int? package,
+    int? availableLoan,
   }) =>
       Data(
         city: city ?? this.city,
@@ -75,6 +84,9 @@ class Data {
         lname: lname ?? this.lname,
         phone: phone ?? this.phone,
         userModelname: userModelname ?? this.userModelname,
+        balance: balance ?? this.balance,
+        package: package ?? this.package,
+        availableLoan: availableLoan ?? this.availableLoan,
       );
 
   factory Data.fromJson(Map<String, dynamic> json) => Data(
@@ -85,6 +97,9 @@ class Data {
         lname: json["lname"],
         phone: json["phone"],
         userModelname: json["userModelname"],
+        balance: json["balance"],
+        package: json["package"],
+        availableLoan: json["availableLoan"],
       );
 
   Map<String, dynamic> toJson() => {
@@ -95,6 +110,9 @@ class Data {
         "lname": lname,
         "phone": phone,
         "userModelname": userModelname,
+        "balance": balance,
+        "package": package,
+        "availableLoan": availableLoan,
       };
 }
 
@@ -109,6 +127,7 @@ class Data {
 // 		"lname": "ben",
 // 		"phone": 124654854,
 // 		"username": "ssssssss"
+// 		"balance": "0.00"
 // 	},
 // 	"msg": "success"
 // }

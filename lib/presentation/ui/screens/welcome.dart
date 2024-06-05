@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import 'package:relax_ride/presentation/ui/screens/main_bottom_nav.dart';
 import 'package:relax_ride/presentation/ui/screens/register_account.dart';
 import 'package:relax_ride/presentation/ui/screens/verify_login.dart';
-import 'package:relax_ride/presentation/ui/utility/app_colors.dart';
 
 import '../widgets/app_logo.dart';
 
@@ -18,21 +17,7 @@ class WelcomePage extends StatelessWidget {
           const SizedBox(
             height: 50,
           ),
-          /*
-          Padding(
-            padding: const EdgeInsets.only(left: 10.0),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: TextButton(
-                onPressed: () {
-                  Get.to(const MainBottomNav());
-                },
-                child: const Text('Skip'),
-              ),
-            ),
-          ),
 
-           */
           const Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -41,7 +26,7 @@ class WelcomePage extends StatelessWidget {
               ),
               Text(
                 'Welcome!',
-                style: TextStyle(fontSize: 35,color: Colors.black),
+                style: TextStyle(fontSize: 24),
               ),
             ],
           ),

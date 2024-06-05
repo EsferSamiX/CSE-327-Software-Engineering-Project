@@ -33,11 +33,11 @@ class _CarouselBannerState extends State<CarouselBanner> {
             autoPlay: true,
           ),
           items: [
-            AssetsPath.c1,
-            AssetsPath.c2,
-            AssetsPath.c3,
-            AssetsPath.c4,
-            AssetsPath.c5,
+            AssetsPath.c11,
+            AssetsPath.c22,
+            AssetsPath.c33,
+            AssetsPath.c44,
+            AssetsPath.c55,
           ].map((assetPath) {
             return Builder(
               builder: (BuildContext context) {

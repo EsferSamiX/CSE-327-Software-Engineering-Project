@@ -4,12 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:relax_ride/constants.dart';
 import 'package:relax_ride/getx_controller/main_controller.dart';
+import 'package:relax_ride/local_notification/local_notification.dart';
 import 'package:relax_ride/presentation/ui/screens/main_bottom_nav.dart';
 import 'package:relax_ride/presentation/ui/screens/payment_success.dart';
 import 'package:relax_ride/presentation/ui/utility/app_colors.dart';
 import 'package:http/http.dart' as http;
 
 RxBool radioWidgetSelectedState = false.obs;
+MainController mainController = Get.find();
 
 class CheckoutScreen extends StatefulWidget {
   const CheckoutScreen({super.key});
@@ -20,11 +22,12 @@ class CheckoutScreen extends StatefulWidget {
 
 class _CheckoutScreenState extends State<CheckoutScreen> {
   String? _selectedValue = 'Abdullahpur';
-  MainController mainController = Get.find();
 
   @override
   void initState() {
     radioWidgetSelectedState.value = false;
+    mainController.selectedPaymentMethodLoan.value = false;
+    mainController.selectedPaymentMethod.value = false;
     super.initState();
   }
 
@@ -40,19 +43,34 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           'tripId': mainController.tripId.value,
           'seatTakenLength': mainController.seatTakenLength.value.toString(),
           'seatTaken': mainController.seatTaken.value,
+          'loanSeatAmount': mainController.selectedPaymentMethodLoan.value
+              ? (mainController.seatTakenLength.value <
+                      mainController.userData.data!.availableLoan!
+                  ? mainController.seatTakenLength.value.toString()
+                  : mainController.userData.data!.availableLoan!.toString())
+              : '0',
+          'loanAmount': mainController.selectedPaymentMethodLoan.value
+              ? (mainController.seatTakenLength.value <=
+                      mainController.userData.data!.availableLoan!.toInt()
+                  ? (mainController.seatTakenLength.value *
+                          mainController.selectedPrice.value)
+                      .toString()
+                  : ((mainController.userData.data!.availableLoan!.toInt()) *
+                          mainController.selectedPrice.value)
+                      .toString())
+              : '0',
         }),
       );
 
       if (response.statusCode == 201) {
         // tripResponseData = TripModel.fromJson(jsonDecode(response.body));
+        mainController.setData('data', response.body);
         debugPrint('Trip fetched successfully. ${response.body}');
-        // Navigator.of(context).pushReplacement(
-        //   MaterialPageRoute(
-        //     builder: (context) => const MainBottomNav(),
-        //   ),
-        // );
+
         Get.offAll(() => const MainBottomNav());
         Get.to(() => const PaymentSuccess());
+        CustomLocalNotification().showNotification(
+            'Trip Confirmed', 'Your trip has been confirmed successfully');
       } else if (response.statusCode == 409) {
         // User already registered
         Get.snackbar('Error', 'User/Phone number already exists');
@@ -171,24 +189,30 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             const SizedBox(
               height: 20,
             ),
-            TextFormField(
-              controller: TextEditingController(
-                text:
-                '${(mainController.seatTakenLength.value * mainController.selectedPrice.value).toStringAsFixed(2)} BDT',
-              ),
-              readOnly: true,
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 24.0),
-              decoration: InputDecoration(
-                labelText: 'Amount',
-                contentPadding: const EdgeInsets.symmetric(
-                    vertical: 20.0, horizontal: 16.0),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(4.0),
-                  borderSide: const BorderSide(color: AppColors.primaryColor),
+            Obx(() {
+              return TextFormField(
+                controller: TextEditingController(
+                  text: mainController.selectedPaymentMethodLoan.value
+                      ? '${(mainController.seatTakenLength.value < mainController.userData.data!.availableLoan! ? 0 : (mainController.seatTakenLength.value - mainController.userData.data!.availableLoan!.toDouble()) * mainController.selectedPrice.value).toStringAsFixed(2)} BDT'
+                      : '${(mainController.seatTakenLength.value * mainController.selectedPrice.value).toStringAsFixed(2)} BDT',
                 ),
-              ),
-            ),
+
+                // initialValue:
+                //     '${(mainController.seatTakenLength.value * mainController.selectedPrice.value).toStringAsFixed(2)} BDT',
+                readOnly: true,
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 24.0),
+                decoration: InputDecoration(
+                  labelText: 'Amount',
+                  contentPadding: const EdgeInsets.symmetric(
+                      vertical: 20.0, horizontal: 16.0),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(4.0),
+                    borderSide: const BorderSide(color: AppColors.primaryColor),
+                  ),
+                ),
+              );
+            }),
             const SizedBox(
               height: 50,
             ),
@@ -198,6 +222,13 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               child: Obx(() {
                 return ElevatedButton(
                   onPressed: () async {
+                    if (mainController.selectedPaymentMethodLoan.value &&
+                        mainController.seatTakenLength.value >
+                            mainController.userData.data!.availableLoan!) {
+                      Get.snackbar('Loan seats limit exceed ',
+                          'Your avaliable loan is ${mainController.userData.data!.availableLoan} seats');
+                      return;
+                    }
                     await confirmTrip(context);
                     // Get.to(const PaymentSuccess());
                   },
@@ -249,6 +280,8 @@ class RadioWidgetState extends State<RadioWidget> {
     PaymentMethod('Nagad', 'assets/images/nagad.png'),
     PaymentMethod('Nexuspay', 'assets/images/nexus.png'),
     PaymentMethod('Eastern Bank', 'assets/images/eastern.png'),
+    if (mainController.userData.data!.availableLoan! > 0)
+      PaymentMethod('Take Loan', 'assets/images/addmoney.png')
   ];
 
   @override
@@ -329,7 +362,13 @@ class RadioWidgetState extends State<RadioWidget> {
                     onChanged: (PaymentMethod? value) {
                       setState(() {
                         radioWidgetSelectedState.value = true;
-
+                        // var spy =
+                        if (value == paymentMethods.last) {
+                          mainController.selectedPaymentMethodLoan.value = true;
+                        } else {
+                          mainController.selectedPaymentMethodLoan.value =
+                              false;
+                        }
                         _selectedPaymentMethod = value;
                       });
                     },
