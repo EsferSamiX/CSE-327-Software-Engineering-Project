@@ -1,0 +1,541 @@
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:relax_ride/getx_controller/main_controller.dart';
+import 'package:relax_ride/models/trip_model.dart';
+import 'package:relax_ride/presentation/ui/utility/app_colors.dart';
+import 'checkout_screen.dart';
+
+class SeatAllocation extends StatefulWidget {
+  const SeatAllocation({super.key, required this.data});
+  final Data data;
+  @override
+  SeatAllocationState createState() => SeatAllocationState();
+}
+
+class SeatAllocationState extends State<SeatAllocation> {
+  List<String> selectedSeats = [];
+  MainController mainController = Get.find();
+
+  Future<void> continueTrip() async {
+    mainController.userId.value =
+        mainController.userDataLocal!.data!.id.toString();
+    mainController.tripId.value = widget.data.id.toString();
+    mainController.seatTakenLength.value = selectedSeats.length;
+    mainController.seatTaken.value = selectedSeats.toString();
+    mainController.selectedPrice.value = widget.data.price;
+    mainController.tripTo.value = widget.data.toLocation;
+    mainController.tripFrom.value = widget.data.fromLocation;
+    mainController.tripSelectedData = widget.data;
+  }
+
+  void handleSeatTap(String seatNumber) {
+    setState(() {
+      if (selectedSeats.contains(seatNumber)) {
+        selectedSeats.remove(seatNumber);
+      } else if (selectedSeats.length >= 4) {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text('Booking Limit Reached'),
+              content: const Text(
+                'Sorry, you can\'t book more than 4 seats!.',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('OK'),
+                ),
+              ],
+            );
+          },
+        );
+      } else {
+        selectedSeats.add(seatNumber);
+      }
+    });
+    debugPrint('Selected Seats: $selectedSeats');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Seat Seats Allocation'),
+        // actions: [
+        //   IconButton(
+        //     onPressed: () {
+        //       Get.offAll(() => const OnboardingScreen());
+        //     },
+        //     icon: const Icon(Icons.logout),
+        //   ),
+        // ],
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            const SizedBox(height: 20),
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.grey.shade200,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.5),
+                    spreadRadius: 5,
+                    blurRadius: 7,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: SizedBox(
+                width: 350,
+                height: 100,
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Text(
+                            'Selected seats: ${selectedSeats.length}',
+                            style: const TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.teal,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 5),
+                      Row(
+                        children: [
+                          Text(
+                            selectedSeats.join(', '),
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                              color: AppColors.primaryColor,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 30),
+            Align(
+              alignment: Alignment.center,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: AppColors.p1,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.5),
+                      spreadRadius: 5,
+                      blurRadius: 7,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                ),
+                width: 320,
+                height: 530,
+                child: Padding(
+                  padding: const EdgeInsets.all(40),
+                  child: Column(
+                    children: [
+                      const Row(
+                        children: [
+                          SizedBox(width: 175),
+                          Icon(Icons.airline_seat_recline_extra, size: 32),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        children: [
+                          const SizedBox(width: 10),
+                          const Seat(seatNumber: 'A1', isBooked: true),
+                          const SizedBox(
+                            width: 5,
+                          ),
+                          const Seat(seatNumber: 'A2', isBooked: true),
+                          const SizedBox(width: 40),
+                          Seat(
+                            seatNumber: 'A3',
+                            isSelected: selectedSeats.contains('A3'),
+                            onTap: () => handleSeatTap('A3'),
+                          ),
+                          const SizedBox(
+                            width: 5,
+                          ),
+                          Seat(
+                            seatNumber: 'A4',
+                            isSelected: selectedSeats.contains('A4'),
+                            onTap: () => handleSeatTap('A4'),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 5),
+                      Row(
+                        children: [
+                          const SizedBox(width: 10),
+                          const Seat(seatNumber: 'B1', isBooked: true),
+                          const SizedBox(
+                            width: 5,
+                          ),
+                          const Seat(seatNumber: 'B2', isBooked: true),
+                          const SizedBox(width: 40),
+                          Seat(
+                            seatNumber: 'B3',
+                            isSelected: selectedSeats.contains('B3'),
+                            onTap: () => handleSeatTap('B3'),
+                          ),
+                          const SizedBox(
+                            width: 5,
+                          ),
+                          const Seat(seatNumber: 'B4', isBooked: true),
+                        ],
+                      ),
+                      const SizedBox(height: 5),
+                      Row(
+                        children: [
+                          const SizedBox(width: 10),
+                          Seat(
+                            seatNumber: 'C1',
+                            isSelected: selectedSeats.contains('C1'),
+                            onTap: () => handleSeatTap('C1'),
+                          ),
+                          const SizedBox(
+                            width: 5,
+                          ),
+                          const Seat(seatNumber: 'C2', isBooked: true),
+                          const SizedBox(width: 40),
+                          const Seat(seatNumber: 'C3', isBooked: true),
+                          const SizedBox(
+                            width: 5,
+                          ),
+                          Seat(
+                            seatNumber: 'C4',
+                            isSelected: selectedSeats.contains('C4'),
+                            onTap: () => handleSeatTap('C4'),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 5),
+                      Row(
+                        children: [
+                          const SizedBox(width: 10),
+                          Seat(
+                            seatNumber: 'D1',
+                            isSelected: selectedSeats.contains('D1'),
+                            onTap: () => handleSeatTap('D1'),
+                          ),
+                          const SizedBox(
+                            width: 5,
+                          ),
+                          const Seat(seatNumber: 'D2', isBooked: true),
+                          const SizedBox(width: 40),
+                          Seat(
+                            seatNumber: 'D3',
+                            isSelected: selectedSeats.contains('D3'),
+                            onTap: () => handleSeatTap('D3'),
+                          ),
+                          const SizedBox(
+                            width: 5,
+                          ),
+                          Seat(
+                            seatNumber: 'D4',
+                            isSelected: selectedSeats.contains('D4'),
+                            onTap: () => handleSeatTap('D4'),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 5),
+                      Row(
+                        children: [
+                          const SizedBox(width: 10),
+                          const Seat(seatNumber: 'E1', isBooked: true),
+                          const SizedBox(
+                            width: 5,
+                          ),
+                          Seat(
+                            seatNumber: 'E2',
+                            isSelected: selectedSeats.contains('E2'),
+                            onTap: () => handleSeatTap('E2'),
+                          ),
+                          const SizedBox(width: 40),
+                          const Seat(seatNumber: 'E3', isBooked: true),
+                          const SizedBox(
+                            width: 5,
+                          ),
+                          Seat(
+                            seatNumber: 'E4',
+                            isSelected: selectedSeats.contains('E4'),
+                            onTap: () => handleSeatTap('E4'),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 5),
+                      Row(
+                        children: [
+                          const SizedBox(width: 10),
+                          Seat(
+                            seatNumber: 'F1',
+                            isSelected: selectedSeats.contains('F1'),
+                            onTap: () => handleSeatTap('F1'),
+                          ),
+                          const SizedBox(
+                            width: 5,
+                          ),
+                          const Seat(seatNumber: 'F2', isBooked: true),
+                          const SizedBox(width: 40),
+                          Seat(
+                            seatNumber: 'F3',
+                            isSelected: selectedSeats.contains('F3'),
+                            onTap: () => handleSeatTap('F3'),
+                          ),
+                          const SizedBox(
+                            width: 5,
+                          ),
+                          const Seat(seatNumber: 'F4', isBooked: true),
+                        ],
+                      ),
+                      const SizedBox(height: 5),
+                      Row(
+                        children: [
+                          const SizedBox(width: 10),
+                          const Seat(seatNumber: 'G1', isBooked: true),
+                          const SizedBox(
+                            width: 5,
+                          ),
+                          Seat(
+                            seatNumber: 'G2',
+                            isSelected: selectedSeats.contains('G2'),
+                            onTap: () => handleSeatTap('G2'),
+                          ),
+                          const SizedBox(width: 40),
+                          const Seat(seatNumber: 'G2', isBooked: true),
+                          const SizedBox(
+                            width: 5,
+                          ),
+                          Seat(
+                            seatNumber: 'G4',
+                            isSelected: selectedSeats.contains('G4'),
+                            onTap: () => handleSeatTap('G4'),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 5),
+                      Row(
+                        children: [
+                          const SizedBox(width: 10),
+                          const Seat(seatNumber: 'H1', isBooked: true),
+                          const SizedBox(
+                            width: 5,
+                          ),
+                          Seat(
+                            seatNumber: 'H2',
+                            isSelected: selectedSeats.contains('H2'),
+                            onTap: () => handleSeatTap('H2'),
+                          ),
+                          const SizedBox(width: 40),
+                          Seat(
+                            seatNumber: 'H3',
+                            isSelected: selectedSeats.contains('H3'),
+                            onTap: () => handleSeatTap('H3'),
+                          ),
+                          const SizedBox(
+                            width: 5,
+                          ),
+                          Seat(
+                            seatNumber: 'H4',
+                            isSelected: selectedSeats.contains('H4'),
+                            onTap: () => handleSeatTap('H4'),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 5),
+                      Row(
+                        children: [
+                          const SizedBox(width: 10),
+                          Seat(
+                            seatNumber: 'I1',
+                            isSelected: selectedSeats.contains('I1'),
+                            onTap: () => handleSeatTap('I1'),
+                          ),
+                          const SizedBox(
+                            width: 2,
+                          ),
+                          Seat(
+                            seatNumber: 'I2',
+                            isSelected: selectedSeats.contains('I2'),
+                            onTap: () => handleSeatTap('I2'),
+                          ),
+                          const SizedBox(
+                            width: 3,
+                          ),
+                          Seat(
+                            seatNumber: 'I3',
+                            isSelected: selectedSeats.contains('I3'),
+                            onTap: () => handleSeatTap('I3'),
+                          ),
+                          const SizedBox(
+                            width: 3,
+                          ),
+                          Seat(
+                            seatNumber: 'I4',
+                            isSelected: selectedSeats.contains('I4'),
+                            onTap: () => handleSeatTap('I4'),
+                          ),
+                          const SizedBox(
+                            width: 2,
+                          ),
+                          Seat(
+                            seatNumber: 'I5',
+                            isSelected: selectedSeats.contains('I5'),
+                            onTap: () => handleSeatTap('I5'),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 30),
+            SizedBox(
+              width: 210,
+              child: ElevatedButton(
+                  onPressed: () {
+                    if (selectedSeats.isEmpty) {
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: const Text('No Seat Selected'),
+                            content: const Text(
+                              'Please select at least one seat to continue!',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                                child: const Text('OK'),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                      return;
+                    }
+
+                    continueTrip();
+                    Get.to(() => const CheckoutScreen());
+                  },
+                  style: ButtonStyle(
+                    backgroundColor: selectedSeats.isEmpty
+                        ? MaterialStateProperty.all(Colors.grey)
+                        : MaterialStateProperty.all(AppColors.primaryColor),
+                  ),
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text('Continue Booking'),
+                    ],
+                  )),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class Seat extends StatelessWidget {
+  final String seatNumber;
+  final bool isBooked;
+  final bool isSelected;
+  final VoidCallback? onTap;
+
+  const Seat({
+    super.key,
+    required this.seatNumber,
+    this.isBooked = false,
+    this.isSelected = false,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    Color backgroundColor = isBooked
+        ? Colors.grey
+        : isSelected
+            ? AppColors.primaryColor
+            : Colors.white;
+
+    return GestureDetector(
+      onTap: () {
+        if (isBooked) {
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: const Text('Grey Colored Seat'),
+                content: const Text(
+                  'Sorry, the seat was booked!',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text('OK'),
+                  ),
+                ],
+              );
+            },
+          );
+        } else {
+          onTap?.call();
+        }
+      },
+      child: Container(
+        width: 40,
+        height: 40,
+        decoration: BoxDecoration(
+          border: Border.all(color: isSelected ? Colors.green : Colors.black),
+          borderRadius: BorderRadius.circular(5),
+          color: backgroundColor,
+        ),
+        child: Center(
+          child: Text(
+            seatNumber,
+            style: TextStyle(
+              color: isBooked ? Colors.white : Colors.black,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
